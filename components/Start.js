@@ -33,6 +33,9 @@ export default class Start extends React.Component {
                             <Text>Choose Background Colour:</Text>
                             <View style={styles.colourPicker}>
                                 <TouchableOpacity
+                                    accessible={true}
+                                    accessibilityLabel="Black Colour"
+                                    accessibilityHint="Set the colour black as your chat window background."
                                     style={[
                                         styles.colours,
                                         styles.black,
@@ -40,6 +43,9 @@ export default class Start extends React.Component {
                                     onPress={() => this.setState({ bgColour: "#090C08" })}
                                 ></TouchableOpacity>
                                 <TouchableOpacity
+                                    accessible={true}
+                                    accessibilityLabel="Gray Colour"
+                                    accessibilityHint="Set the colour gray as your chat window background."
                                     style={[
                                         styles.colours,
                                         styles.gray,
@@ -47,6 +53,9 @@ export default class Start extends React.Component {
                                     onPress={() => this.setState({ bgColour: "#474056" })}
                                 ></TouchableOpacity>
                                 <TouchableOpacity
+                                    accessible={true}
+                                    accessibilityLabel="Light Gray Colour"
+                                    accessibilityHint="Set the colour light gray as your chat window background."
                                     style={[
                                         styles.colours,
                                         styles.lightGray,
@@ -54,6 +63,9 @@ export default class Start extends React.Component {
                                     onPress={() => this.setState({ bgColour: "#8A95A5" })}
                                 ></TouchableOpacity>
                                 <TouchableOpacity
+                                    accessible={true}
+                                    accessibilityLabel="Green Colour"
+                                    accessibilityHint="Set the colour green as your chat window background."
                                     style={[
                                         styles.colours,
                                         styles.green,
@@ -64,6 +76,9 @@ export default class Start extends React.Component {
                         </View>
                         {/*On press it will set props to navigate to chat and set state for name and bgColour*/}
                         <TouchableOpacity
+                            accessible={true}
+                            accessibilityLabel="Enter Chat Button"
+                            accessibilityHint="Let's you enter the chat sceen after selecting a name and colour."
                             style={[
                                 styles.startChattingContainer,
                                 { backgroundColor: this.state.bgColour },
