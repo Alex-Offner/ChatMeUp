@@ -1,13 +1,37 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import firebase from 'firebase/app';
+import "firebase/auth";
+import "firebase/firestore";
+
+//Config for firebase, give app access to firebase database
+const firebaseConfig = {
+    apiKey: "AIzaSyDLHSD3ONTgPwRtuP3V_jNjqGwWneGY5Yo",
+    authDomain: "chatmeup-9b360.firebaseapp.com",
+    projectId: "chatmeup-9b360",
+    storageBucket: "chatmeup-9b360.appspot.com",
+    messagingSenderId: "500947344839",
+    appId: "1:500947344839:web:477a6853de59b0349e8de2",
+    measurementId: "G-2K6S34STXX"
+};
 
 export default class Chat extends React.Component {
     constructor() {
         super();
         this.state = {
             messages: [],
+            uid: 0,
+            user: {
+                _id: "",
+                name: "",
+            }
         }
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        this.referenceMessages = firebase.firestore().collection("messages");
     }
 
     //Called after Chat component Mounts. Setting state of message and props for name
@@ -34,13 +58,77 @@ export default class Chat extends React.Component {
                 },
             ],
         })
+
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                await firebase.auth().signInAnonymously();
+            }
+
+            this.setState({
+                uid: user.uid,
+                messages: [],
+                user: {
+                    _id: user.displayName,
+                    name: name,
+                }
+            });
+
+            this.referenceMessagesUsers = firebase
+                .firestore()
+                .collection("messages")
+                .where("uid", "==", this.state.uid);
+
+            this.unsubscribe = this.referenceMessages
+                .orderBy("createdAt", "desc")
+                .onSnapshot(this.onCollectionUpdate);
+        });
     }
 
-    //Append puts the written message in the message object
+    componentWillUnmount() {
+        this.unsubscribe();
+        this.authUnsubscribe();
+    }
+
+    onCollectionUpdate = (querySnapshot) => {
+        const messages = [];
+        //go through each document
+        querySnapshot.forEach((doc) => {
+            //get the queryDocumentSnapshot's data
+            const data = doc.data();
+            messages.push({
+                _id: data._id,
+                text: data.text || "",
+                createdAt: data.createdAt.toDate(),
+                user: {
+                    _id: data.user._id,
+                    name: data.user.name,
+                }
+            });
+        });
+        this.setState({
+            messages,
+        });
+    };
+
     onSend(messages = []) {
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages, messages),
-        }))
+        }),
+            () => {
+                this.addMessages();
+            })
+    }
+
+    addMessages() {
+        const message = this.state.messages[0];
+        //added new message to firebase
+        this.referenceMessages.add({
+            uid: this.state.uid,
+            _id: message._id,
+            text: message.text || "",
+            createdAt: message.createdAt,
+            user: message.user,
+        });
     }
 
     renderBubble(props) {
@@ -76,9 +164,7 @@ export default class Chat extends React.Component {
                     renderBubble={this.renderBubble.bind(this)}
                     messages={this.state.messages}
                     onSend={messages => this.onSend(messages)}
-                    user={{
-                        _id: 1,
-                    }}
+                    user={this.state.user}
                 />
                 {/* On android devices, add KeyboardAvoiding view  */}
                 {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null
