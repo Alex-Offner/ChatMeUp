@@ -25,7 +25,8 @@ export default class Chat extends React.Component {
             user: {
                 _id: "",
                 name: "",
-            }
+                avatar: "",
+            },
         }
 
         if (!firebase.apps.length) {
@@ -70,7 +71,8 @@ export default class Chat extends React.Component {
                 user: {
                     _id: user.displayName,
                     name: name,
-                }
+                    avatar: "https://placeimg.com/140/140/any",
+                },
             });
 
             this.referenceMessagesUsers = firebase
@@ -102,7 +104,8 @@ export default class Chat extends React.Component {
                 user: {
                     _id: data.user._id,
                     name: data.user.name,
-                }
+                    avatar: data.user.avatar,
+                },
             });
         });
         this.setState({
@@ -139,6 +142,8 @@ export default class Chat extends React.Component {
         return (
             <Bubble
                 {...props}
+                //How can I diferentiate between the user that is currently logged in the device and the one who is sending from somewhere else?
+                // position={this.state.uid == this.state.messages.user._id ? 'right' : 'left'}
                 wrapperStyle={{
                     right: {
                         backgroundColor: bgColour,
