@@ -54,13 +54,16 @@ export default class Chat extends React.Component {
     componentDidMount() {
         let { name } = this.props.route.params;
 
+        //Grabs props: name from Start.js
         this.props.navigation.setOptions({ title: name });
 
+        //Checks if user is online and sets state accordingly
         NetInfo.fetch().then(connection => {
             if (connection.isConnected) {
                 this.setState({ isConnected: true });
-                console.log("online");
+                console.log("You are online!");
 
+                //Firebase anonymously authentication; loading firebase database if user is online
                 this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
                     if (!user) {
                         await firebase.auth().signInAnonymously();
