@@ -5,7 +5,9 @@ import firebase from 'firebase/app';
 import "firebase/auth";
 import "firebase/firestore";
 import NetInfo from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
 
 //Config for firebase, give app access to firebase database
 const firebaseConfig = {
@@ -30,6 +32,8 @@ export default class Chat extends React.Component {
                 avatar: "",
             },
             isConnected: false,
+            image: null,
+            location: null,
         }
 
         if (!firebase.apps.length) {
@@ -89,6 +93,7 @@ export default class Chat extends React.Component {
                         .onSnapshot(this.onCollectionUpdate);
                 });
             } else {
+                //if user is offline, call getMessages to get localy stored messages
                 console.log("You are offline!");
                 this.setState({ isConnected: false });
                 this.getMessages();
@@ -118,6 +123,8 @@ export default class Chat extends React.Component {
                     name: data.user.name,
                     avatar: data.user.avatar,
                 },
+                image: data.image || null,
+                location: data.location || null,
             });
         });
         this.setState({
@@ -144,6 +151,8 @@ export default class Chat extends React.Component {
             text: message.text || "",
             createdAt: message.createdAt,
             user: message.user,
+            image: message.image || null,
+            location: message.location || null,
         });
     }
 
@@ -164,6 +173,29 @@ export default class Chat extends React.Component {
         } catch (error) {
             console.log(error.message);
         }
+    }
+
+    renderCustomView(props) {
+        const { currentMessage } = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{
+                        width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3
+                    }}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            );
+        }
+        return null;
     }
 
     renderInputToolbar(props) {
@@ -203,6 +235,33 @@ export default class Chat extends React.Component {
         )
     }
 
+    renderCustomActions = (props) => {
+        return <CustomActions {...props} />;
+    };
+
+    renderCustomView(props) {
+        const { currentMessage } = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{
+                        width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3,
+                    }}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            );
+        }
+        return null;
+    }
+
     render() {
 
         return (
@@ -213,9 +272,15 @@ export default class Chat extends React.Component {
                     renderInputToolbar={this.renderInputToolbar.bind(this)}
                     messages={this.state.messages}
                     onSend={messages => this.onSend(messages)}
+                    renderUsernameOnMessage={true}
+                    showUserAvatar={true}
                     user={{
                         _id: this.state.user._id,
+                        name: this.state.user.name,
+                        avatar: this.state.user.avatar,
                     }}
+                    renderActions={this.renderCustomActions}
+                    renderCustomView={this.renderCustomView}
                 />
                 {/* On android devices, add KeyboardAvoiding view  */}
                 {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null
