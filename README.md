@@ -108,6 +108,6 @@ A window will be opened in your browser from which you will be able to open the 
 <h2 id="contact">Contact</h2>
 
 To contact me, send me a mail: 
-(mailto:alex.offner@googlemail.com)-> <alex.offner@googlemail.com>
+<alex.offner@googlemail.com>
 
 
