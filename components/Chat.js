@@ -217,8 +217,6 @@ export default class Chat extends React.Component {
         return (
             <Bubble
                 {...props}
-                //How can I diferentiate between the user that is currently logged in the device and the one who is sending from somewhere else?
-                // position={this.state.uid == this.state.messages.user._id ? 'right' : 'left'}
                 wrapperStyle={{
                     right: {
                         backgroundColor: bgColour,
