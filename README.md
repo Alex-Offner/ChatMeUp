@@ -5,7 +5,7 @@ This mobile chat app was developed with React Native. Users are able to chose th
     </h3>
 
 <p float="left">
-  <img src="" width="300">
+  <img src="./files/example1.png" width="300">
   <img src="" width="300">
 </p>
 
