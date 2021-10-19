@@ -5,8 +5,7 @@ import "firebase/firestore";
 import * as Permissions from "expo-permissions";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-// import MapView from "react-native-maps";
-// import firebase from "firebase";
+import firebase from "firebase";
 
 
 export default class CustomActions extends Component {
@@ -26,7 +25,7 @@ export default class CustomActions extends Component {
                         return this.pickImage();
                     case 1:
                         console.log('user wants to take a photo');
-                        return;
+                        return this.takePhoto();
                     case 2:
                         console.log('user wants to get their location');
                         return this.getLocation();
@@ -43,6 +42,27 @@ export default class CustomActions extends Component {
                 const result = await ImagePicker.launchImageLibraryAsync({
                     mediaTypes: "Images",
                 }).catch((error) => console.log(error));
+
+                if (!result.cancelled) {
+                    const imageUrl = await this.uploadImageFetch(result.uri);
+                    this.props.onSend({ image: imageUrl });
+                }
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    takePhoto = async () => {
+        const { status } = await Permissions.askAsync(
+            Permissions.MEDIA_LIBRARY,
+            Permissions.CAMERA
+        );
+        try {
+            if (status === "granted") {
+                const result = await ImagePicker.launchCameraAsync().catch((error) =>
+                    console.log(error)
+                );
 
                 if (!result.cancelled) {
                     const imageUrl = await this.uploadImageFetch(result.uri);
@@ -90,8 +110,8 @@ export default class CustomActions extends Component {
                 const result = await Location.getCurrentPositionAsync({}).catch(
                     (error) => console.log(error)
                 );
-                const longitude = JSON.stringify(result.coords.longitude);
-                const latitude = JSON.stringify(result.coords.latitude);
+                const longitude = result.coords.longitude;
+                const latitude = result.coords.latitude;
                 if (result) {
                     this.props.onSend({
                         location: {
@@ -150,3 +170,6 @@ const styles = StyleSheet.create({
 CustomActions.contextTypes = {
     actionSheet: PropTypes.func,
 };
+
+//disables warning messages in expo
+//console.disableYellowBox = true;
